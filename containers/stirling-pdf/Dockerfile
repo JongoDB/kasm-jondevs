@@ -15,3 +15,5 @@ RUN echo '#!/bin/bash\n/stirling-pdf/StirlingPDF &\nsleep 5\nchromium --no-sandb
  && chmod +x /usr/bin/start-chromium-stirling
 
 CMD ["start-chromium-stirling"]
+
+#Trigger build
