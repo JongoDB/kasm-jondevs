@@ -6,7 +6,7 @@ on:
       - 'containers/stirling-pdf/**'
       - '.github/workflows/publish-stirling-pdf.yml'
     branches:
-      - main
+      - 1.1
 
 jobs:
   build-and-push:
