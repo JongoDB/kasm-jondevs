@@ -2,7 +2,7 @@
 
 const nextConfig = {
   output: 'export',
-  distDir: '../public',
+  distDir: 'out',
   env: {
     name: 'JonDevs Workspaces',
     description: 'JonDevs store for Kasm supported workspaces.',
@@ -11,7 +11,7 @@ const nextConfig = {
     contactUrl: 'https://kasmweb.com/support',
   },
   reactStrictMode: true,
-  basePath: '/1.0',
+  basePath: '/kasm-jondevs/1.1',
   trailingSlash: true,
   images: {
     unoptimized: true,
