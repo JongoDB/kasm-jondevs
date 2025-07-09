@@ -1,4 +1,4 @@
-FROM kasmweb/ubuntu-chromium:1.17.0-rolling-weekly
+FROM kasmweb/ubuntu-chromium:1.16.0
 
 USER root
 
