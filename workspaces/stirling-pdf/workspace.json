@@ -1,0 +1,23 @@
+{
+  "friendly_name": "Stirling PDF",
+  "description": "All-in-one PDF tool for editing, merging, splitting, and converting PDFs.",
+  "image_src": "stirling-pdf.png",
+  "architecture": [
+    "amd64"
+  ],
+  "categories": [
+    "Productivity",
+    "Utilities"
+  ],
+  "docker_registry": "https://index.docker.io/v1/", 
+  "compatibility": [
+    {
+      "version": "1.17.x",
+      "image": "frooodle/s-pdf:latest",
+      "uncompressed_size_mb": 800,
+      "available_tags": [
+        "latest"
+      ]
+    }
+  ]
+}
