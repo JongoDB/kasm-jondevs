@@ -2,7 +2,7 @@
 
 const nextConfig = {
   output: 'export',
-  distDir: 'out',
+  distDir: '../public',
   env: {
     name: 'JonDevs Workspaces',
     description: 'JonDevs store for Kasm supported workspaces.',
