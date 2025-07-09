@@ -10,9 +10,10 @@ RUN apt-get update && apt-get install -y \
     wget \
  && rm -rf /var/lib/apt/lists/*
 
-# Download and extract Stirling PDF
+# Download and extract Stirling PDF separately for better error handling
 RUN mkdir -p /opt/stirling-pdf \
- && wget -q https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/stirling-pdf.zip -O /opt/stirling-pdf/stirling-pdf.zip \
+ && wget https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/stirling-pdf.zip -O /opt/stirling-pdf/stirling-pdf.zip \
+ && ls -lh /opt/stirling-pdf/ \
  && unzip /opt/stirling-pdf/stirling-pdf.zip -d /opt/stirling-pdf \
  && chmod +x /opt/stirling-pdf/StirlingPDF
 
