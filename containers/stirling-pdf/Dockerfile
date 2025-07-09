@@ -1,4 +1,4 @@
-FROM kasmweb/chromium:1.16.0-rolling
+FROM kasmweb/chromium:1.17.0-rolling-daily
 
 USER root
 
