@@ -1,21 +1,19 @@
 {
+  "friendly_name": "Stirling PDF",
   "description": "All-in-one PDF tool for editing, merging, splitting, and converting PDFs.",
-  "docker_registry": "https://index.docker.io/v1/",
   "image_src": "stirling-pdf.png",
   "categories": [
     "Productivity"
   ],
-  "friendly_name": "Stirling PDF",
   "architecture": [
     "amd64"
   ],
-  "cores":4,
-  "memory": 8192,
+  "docker_registry": "https://ghcr.io",
   "compatibility": [
     {
       "version": "1.17.x",
-      "image": "frooodle/s-pdf:latest",
-      "uncompressed_size_mb": 1100,
+      "image": "ghcr.io/jongodb/kasm-stirling-pdf:latest",
+      "uncompressed_size_mb": 856,
       "available_tags": [
         "latest"
       ]
