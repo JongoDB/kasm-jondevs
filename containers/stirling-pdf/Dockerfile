@@ -9,9 +9,11 @@ RUN apt-get update && apt-get install -y \
     wget \
  && rm -rf /var/lib/apt/lists/*
 
-# Download and install Stirling PDF via .deb
+# Download and install Stirling PDF via .deb (with dependencies)
 RUN wget -O /tmp/stirling.deb https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/stirling.deb \
- && dpkg -i /tmp/stirling.deb \
+ && dpkg -i /tmp/stirling.deb || true \
+ && apt-get update \
+ && apt-get install -f -y \
  && rm /tmp/stirling.deb
 
 # Launcher script
