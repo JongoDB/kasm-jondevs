@@ -24,11 +24,13 @@ chromium-browser --no-sandbox http://localhost:8080\n' > /usr/bin/start-stirling
  && chmod +x /usr/bin/start-stirling
 
 # Register with Kasm default profile
-RUN echo "{ \
-  \"name\": \"Stirling PDF\", \
-  \"description\": \"All-in-one PDF toolkit in a browser\", \
-  \"command\": \"start-stirling\", \
-  \"icon\": \"fa fa-file-pdf-o\" \
-}" > /usr/share/kasm_default_profile/profile.json
+RUN printf '%s\n' \
+  '{' \
+  '  "name": "Stirling PDF",' \
+  '  "description": "All-in-one PDF toolkit in a browser",' \
+  '  "command": "start-stirling",' \
+  '  "icon": "fa fa-file-pdf-o"' \
+  '}' \
+  > /usr/share/kasm_default_profile/profile.json
 
 CMD ["/dockerstartup/kasm_default_profile.sh"]
