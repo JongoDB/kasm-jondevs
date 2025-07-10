@@ -17,11 +17,16 @@ RUN apt-get update && apt-get install -y \
 # Download and install Stirling PDF directly as JAR (more reliable than .deb)
 RUN mkdir -p /opt/stirling-pdf \
     && wget -O /opt/stirling-pdf/Stirling-PDF.jar https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/Stirling-PDF.jar \
-    && chmod +x /opt/stirling-pdf/Stirling-PDF.jar
+    && chmod +x /opt/stirling-pdf/Stirling-PDF.jar \
+    && mkdir -p /opt/stirling-pdf/configs /opt/stirling-pdf/logs /opt/stirling-pdf/customFiles \
+    && chown -R kasm-user:kasm-user /opt/stirling-pdf
 
 # Create a simple startup script for Stirling PDF
 RUN echo '#!/bin/bash\ncd /opt/stirling-pdf\njava -jar Stirling-PDF.jar' > /opt/stirling-pdf/start.sh \
     && chmod +x /opt/stirling-pdf/start.sh
+
+# Expose port 8080 for Stirling PDF
+EXPOSE 8080
 
 # Create Chrome wrapper script with proper flags for container environment
 RUN echo '#!/bin/bash\n\
@@ -48,18 +53,33 @@ google-chrome \\\n\
 RUN echo '#!/bin/bash\n\
 echo "Starting Stirling PDF..."\n\
 cd /opt/stirling-pdf\n\
-java -jar Stirling-PDF.jar &\n\
+\n\
+# Ensure directories exist with proper permissions\n\
+mkdir -p /opt/stirling-pdf/logs /opt/stirling-pdf/configs /opt/stirling-pdf/customFiles\n\
+\n\
+# Start Stirling PDF with explicit output\n\
+echo "Running: java -jar Stirling-PDF.jar"\n\
+java -jar Stirling-PDF.jar > /tmp/stirling.log 2>&1 &\n\
 STIRLING_PID=$!\n\
 echo "Stirling PDF started with PID: $STIRLING_PID"\n\
 \n\
 # Wait for Stirling PDF to be ready\n\
 echo "Waiting for Stirling PDF to start..."\n\
-for i in {1..30}; do\n\
+for i in {1..10}; do\n\
     if curl -s http://localhost:8080 > /dev/null 2>&1; then\n\
         echo "Stirling PDF is ready!"\n\
         break\n\
     fi\n\
-    echo "Waiting... ($i/30)"\n\
+    echo "Waiting... ($i/10)"\n\
+    if [ $i -eq 5 ]; then\n\
+        echo "Stirling PDF log output:"\n\
+        tail -20 /tmp/stirling.log\n\
+        echo "Checking if process is still running..."\n\
+        if ! kill -0 $STIRLING_PID 2>/dev/null; then\n\
+            echo "ERROR: Stirling PDF process has died!"\n\
+            exit 1\n\
+        fi\n\
+    fi\n\
     sleep 2\n\
 done\n\
 \n\
