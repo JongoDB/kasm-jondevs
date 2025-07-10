@@ -5,7 +5,7 @@ USER root
 # Install Java, Chromium, and unzip
 RUN apt-get update && apt-get install -y \
     openjdk-17-jre \
-    chromium-browser \
+    chromium \
     wget \
  && rm -rf /var/lib/apt/lists/*
 
@@ -20,10 +20,10 @@ RUN wget -O /tmp/stirling.deb https://github.com/Stirling-Tools/Stirling-PDF/rel
 RUN echo '#!/bin/bash\n\
 /opt/stirling-pdf/StirlingPDF &\n\
 sleep 5\n\
-chromium-browser --no-sandbox http://localhost:8080\n' > /usr/bin/start-stirling \
+chromium --no-sandbox http://localhost:8080\n' > /usr/bin/start-stirling \
  && chmod +x /usr/bin/start-stirling
 
-# Create profile.json with proper JSON formatting
+# Create Kasm default profile
 RUN mkdir -p /usr/share/kasm_default_profile && \
     cat << 'EOF' > /usr/share/kasm_default_profile/profile.json
 {
