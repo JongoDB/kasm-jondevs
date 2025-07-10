@@ -31,7 +31,6 @@ EXPOSE 8080
 # Create Chrome wrapper script with proper flags for container environment
 RUN echo '#!/bin/bash\n\
 google-chrome \\\n\
-  --no-sandbox \\\n\
   --disable-dev-shm-usage \\\n\
   --disable-extensions \\\n\
   --disable-plugins \\\n\
@@ -45,6 +44,17 @@ google-chrome \\\n\
   --no-first-run \\\n\
   --no-default-browser-check \\\n\
   --disable-web-security \\\n\
+  --disable-background-networking \\\n\
+  --disable-background-timer-throttling \\\n\
+  --disable-client-side-phishing-detection \\\n\
+  --disable-component-extensions-with-background-pages \\\n\
+  --disable-default-apps \\\n\
+  --disable-hang-monitor \\\n\
+  --disable-prompt-on-repost \\\n\
+  --disable-web-resources \\\n\
+  --metrics-recording-only \\\n\
+  --no-crash-upload \\\n\
+  --disable-crash-reporter \\\n\
   --user-data-dir=/tmp/chrome-user-data \\\n\
   "$@"' > /usr/local/bin/chrome-wrapper \
   && chmod +x /usr/local/bin/chrome-wrapper
@@ -94,9 +104,15 @@ RUN mkdir -p /usr/share/kasm_default_profile && \
 {
   "name": "Stirling PDF",
   "description": "All-in-one PDF toolkit in a browser",
-  "command": "start-stirling",
+  "command": "/usr/bin/start-stirling",
   "icon": "fa fa-file-pdf-o"
 }
 EOF
 
-CMD ["/dockerstartup/kasm_default_profile.sh"]
+# Also create the legacy startup file that some Kasm versions use
+RUN mkdir -p /usr/share/kasmvnc && \
+    echo '#!/bin/bash\n/usr/bin/start-stirling' > /usr/share/kasmvnc/kasmvnc_startup.sh && \
+    chmod +x /usr/share/kasmvnc/kasmvnc_startup.sh
+
+# Set the default command to run the startup script directly
+CMD ["/usr/bin/start-stirling"]
