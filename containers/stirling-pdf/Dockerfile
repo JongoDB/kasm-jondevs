@@ -1,4 +1,4 @@
-FROM kasmtech/core-ubuntu-noble:1.17.0-rolling-daily
+FROM ghcr.io/kasmtech/core-ubuntu-noble:1.17.0-rolling-daily
 USER root
 
 # Install Java, Google Chrome, and dependencies
