@@ -6,59 +6,66 @@ RUN apt-get update && apt-get install -y \
     openjdk-17-jre \
     wget \
     gnupg \
+    curl \
+    unzip \
     && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install Stirling PDF via .deb (with dependencies)
-RUN wget -O /tmp/stirling.deb https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/stirling.deb \
- && dpkg -i /tmp/stirling.deb || true \
- && apt-get update \
- && apt-get install -f -y \
- && rm /tmp/stirling.deb
+# Download and install Stirling PDF directly as JAR (more reliable than .deb)
+RUN mkdir -p /opt/stirling-pdf \
+    && wget -O /opt/stirling-pdf/Stirling-PDF.jar https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/Stirling-PDF.jar \
+    && chmod +x /opt/stirling-pdf/Stirling-PDF.jar
 
-# Find and create symlink for Stirling PDF executable
-RUN echo "Finding Stirling PDF installation..." \
- && find / -name "*Stirling*" -type f 2>/dev/null | head -10 \
- && dpkg -L stirling-pdf | grep -E "(jar|Stirling)" | head -10 \
- && STIRLING_JAR=$(find /usr -name "*.jar" -path "*/stirling*" 2>/dev/null | head -1) \
- && if [ -n "$STIRLING_JAR" ]; then \
-      echo "Found Stirling PDF JAR: $STIRLING_JAR" \
-      && ln -sf "$STIRLING_JAR" /usr/local/bin/stirling-pdf.jar; \
-    else \
-      echo "Stirling PDF JAR not found after installation"; \
-    fi
+# Create a simple startup script for Stirling PDF
+RUN echo '#!/bin/bash\ncd /opt/stirling-pdf\njava -jar Stirling-PDF.jar' > /opt/stirling-pdf/start.sh \
+    && chmod +x /opt/stirling-pdf/start.sh
 
-# Launcher script with proper error handling
+# Create Chrome wrapper script with proper flags for container environment
+RUN echo '#!/bin/bash\n\
+google-chrome \\\n\
+  --no-sandbox \\\n\
+  --disable-dev-shm-usage \\\n\
+  --disable-extensions \\\n\
+  --disable-plugins \\\n\
+  --disable-background-timer-throttling \\\n\
+  --disable-backgrounding-occluded-windows \\\n\
+  --disable-renderer-backgrounding \\\n\
+  --disable-features=TranslateUI \\\n\
+  --disable-default-apps \\\n\
+  --disable-sync \\\n\
+  --disable-gpu \\\n\
+  --no-first-run \\\n\
+  --no-default-browser-check \\\n\
+  --disable-web-security \\\n\
+  --user-data-dir=/tmp/chrome-user-data \\\n\
+  "$@"' > /usr/local/bin/chrome-wrapper \
+  && chmod +x /usr/local/bin/chrome-wrapper
+
+# Main launcher script
 RUN echo '#!/bin/bash\n\
 echo "Starting Stirling PDF..."\n\
-# Try different ways to start Stirling PDF\n\
-if [ -f /opt/stirling-pdf/StirlingPDF ]; then\n\
-    echo "Found StirlingPDF at /opt/stirling-pdf/StirlingPDF"\n\
-    /opt/stirling-pdf/StirlingPDF &\n\
-elif [ -f /usr/local/bin/stirling-pdf.jar ]; then\n\
-    echo "Found Stirling PDF JAR, starting with java..."\n\
-    java -jar /usr/local/bin/stirling-pdf.jar &\n\
-elif [ -f /usr/share/java/stirling-pdf*.jar ]; then\n\
-    echo "Found Stirling PDF in /usr/share/java/"\n\
-    java -jar /usr/share/java/stirling-pdf*.jar &\n\
-else\n\
-    echo "Searching for Stirling PDF..."\n\
-    STIRLING_JAR=$(find /usr -name "*.jar" -path "*stirling*" 2>/dev/null | head -1)\n\
-    if [ -n "$STIRLING_JAR" ]; then\n\
-        echo "Found JAR: $STIRLING_JAR"\n\
-        java -jar "$STIRLING_JAR" &\n\
-    else\n\
-        echo "ERROR: Stirling PDF not found anywhere!"\n\
-        exit 1\n\
-    fi\n\
-fi\n\
+cd /opt/stirling-pdf\n\
+java -jar Stirling-PDF.jar &\n\
+STIRLING_PID=$!\n\
+echo "Stirling PDF started with PID: $STIRLING_PID"\n\
+\n\
+# Wait for Stirling PDF to be ready\n\
 echo "Waiting for Stirling PDF to start..."\n\
-sleep 10\n\
+for i in {1..30}; do\n\
+    if curl -s http://localhost:8080 > /dev/null 2>&1; then\n\
+        echo "Stirling PDF is ready!"\n\
+        break\n\
+    fi\n\
+    echo "Waiting... ($i/30)"\n\
+    sleep 2\n\
+done\n\
+\n\
 echo "Starting Google Chrome..."\n\
-google-chrome --no-sandbox --disable-dev-shm-usage --disable-extensions --disable-plugins --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding http://localhost:8080\n' > /usr/bin/start-stirling \
+mkdir -p /tmp/chrome-user-data\n\
+chrome-wrapper http://localhost:8080\n' > /usr/bin/start-stirling \
  && chmod +x /usr/bin/start-stirling
 
 # Create Kasm default profile
