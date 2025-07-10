@@ -1,4 +1,4 @@
-FROM kasmweb/core-ubuntu-focal:1.16.1-rolling-daily
+FROM kasmtech/core-ubuntu-noble:1.17.0-rolling-daily
 USER root
 
 # Install Java, Google Chrome, and dependencies
@@ -8,11 +8,14 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     curl \
     unzip \
-    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
-    && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
+    && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-chrome-keyring.gpg \
+    && echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-chrome-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
+
+# Expose port 8080 for Stirling PDF
+EXPOSE 8080
 
 # Download and install Stirling PDF directly as JAR (more reliable than .deb)
 RUN mkdir -p /opt/stirling-pdf \
@@ -25,49 +28,52 @@ RUN mkdir -p /opt/stirling-pdf \
 RUN echo '#!/bin/bash\ncd /opt/stirling-pdf\njava -jar Stirling-PDF.jar' > /opt/stirling-pdf/start.sh \
     && chmod +x /opt/stirling-pdf/start.sh
 
-# Expose port 8080 for Stirling PDF
-EXPOSE 8080
-
-# Create Chrome wrapper script with proper flags for container environment
+# Create Chrome wrapper script with container-safe flags
 RUN echo '#!/bin/bash\n\
+# Create Chrome user data directory\n\
+mkdir -p /tmp/chrome-user-data\n\
+\n\
+# Start Chrome with container-safe flags\n\
 google-chrome \\\n\
+  --no-sandbox \\\n\
   --disable-dev-shm-usage \\\n\
-  --disable-extensions \\\n\
-  --disable-plugins \\\n\
+  --disable-setuid-sandbox \\\n\
+  --disable-gpu \\\n\
+  --disable-software-rasterizer \\\n\
   --disable-background-timer-throttling \\\n\
   --disable-backgrounding-occluded-windows \\\n\
   --disable-renderer-backgrounding \\\n\
-  --disable-features=TranslateUI \\\n\
+  --disable-features=TranslateUI,VizDisplayCompositor \\\n\
+  --disable-extensions \\\n\
+  --disable-plugins \\\n\
   --disable-default-apps \\\n\
   --disable-sync \\\n\
-  --disable-gpu \\\n\
   --no-first-run \\\n\
   --no-default-browser-check \\\n\
   --disable-web-security \\\n\
   --disable-background-networking \\\n\
-  --disable-background-timer-throttling \\\n\
   --disable-client-side-phishing-detection \\\n\
   --disable-component-extensions-with-background-pages \\\n\
-  --disable-default-apps \\\n\
   --disable-hang-monitor \\\n\
   --disable-prompt-on-repost \\\n\
   --disable-web-resources \\\n\
-  --metrics-recording-only \\\n\
-  --no-crash-upload \\\n\
   --disable-crash-reporter \\\n\
+  --disable-logging \\\n\
+  --silent \\\n\
   --user-data-dir=/tmp/chrome-user-data \\\n\
   "$@"' > /usr/local/bin/chrome-wrapper \
   && chmod +x /usr/local/bin/chrome-wrapper
 
 # Main launcher script
 RUN echo '#!/bin/bash\n\
+set -e\n\
 echo "Starting Stirling PDF..."\n\
 cd /opt/stirling-pdf\n\
 \n\
 # Ensure directories exist with proper permissions\n\
 mkdir -p /opt/stirling-pdf/logs /opt/stirling-pdf/configs /opt/stirling-pdf/customFiles\n\
 \n\
-# Start Stirling PDF with explicit output\n\
+# Start Stirling PDF in background\n\
 echo "Running: java -jar Stirling-PDF.jar"\n\
 java -jar Stirling-PDF.jar > /tmp/stirling.log 2>&1 &\n\
 STIRLING_PID=$!\n\
@@ -94,8 +100,7 @@ for i in {1..10}; do\n\
 done\n\
 \n\
 echo "Starting Google Chrome..."\n\
-mkdir -p /tmp/chrome-user-data\n\
-chrome-wrapper http://localhost:8080\n' > /usr/bin/start-stirling \
+exec chrome-wrapper http://localhost:8080\n' > /usr/bin/start-stirling \
  && chmod +x /usr/bin/start-stirling
 
 # Create Kasm default profile
@@ -109,10 +114,7 @@ RUN mkdir -p /usr/share/kasm_default_profile && \
 }
 EOF
 
-# Also create the legacy startup file that some Kasm versions use
-RUN mkdir -p /usr/share/kasmvnc && \
-    echo '#!/bin/bash\n/usr/bin/start-stirling' > /usr/share/kasmvnc/kasmvnc_startup.sh && \
-    chmod +x /usr/share/kasmvnc/kasmvnc_startup.sh
+# Switch to kasm-user for runtime
+USER kasm-user
 
-# Set the default command to run the startup script directly
-CMD ["/usr/bin/start-stirling"]
+CMD ["/dockerstartup/kasm_default_profile.sh"]
