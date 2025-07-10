@@ -5,9 +5,13 @@ USER root
 # Install Java, Chromium, and unzip
 RUN apt-get update && apt-get install -y \
     openjdk-17-jre \
-    chromium \
     wget \
- && rm -rf /var/lib/apt/lists/*
+    gnupg \
+    software-properties-common && \
+    add-apt-repository ppa:canonical-chromium-builds/stage && \
+    apt-get update && apt-get install -y chromium-browser && \
+    rm -rf /var/lib/apt/lists/*
+
 
 # Download and install Stirling PDF via .deb (with dependencies)
 RUN wget -O /tmp/stirling.deb https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/stirling.deb \
