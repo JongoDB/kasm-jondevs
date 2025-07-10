@@ -28,38 +28,14 @@ RUN mkdir -p /opt/stirling-pdf \
 RUN echo '#!/bin/bash\ncd /opt/stirling-pdf\njava -jar Stirling-PDF.jar' > /opt/stirling-pdf/start.sh \
     && chmod +x /opt/stirling-pdf/start.sh
 
-# Create Chrome wrapper script with container-safe flags
+# Create Chrome wrapper script with minimal, essential flags
 RUN echo '#!/bin/bash\n\
-# Create Chrome user data directory\n\
 mkdir -p /tmp/chrome-user-data\n\
-\n\
-# Start Chrome with container-safe flags\n\
 google-chrome \\\n\
   --no-sandbox \\\n\
   --disable-dev-shm-usage \\\n\
-  --disable-setuid-sandbox \\\n\
   --disable-gpu \\\n\
-  --disable-software-rasterizer \\\n\
-  --disable-background-timer-throttling \\\n\
-  --disable-backgrounding-occluded-windows \\\n\
-  --disable-renderer-backgrounding \\\n\
-  --disable-features=TranslateUI,VizDisplayCompositor \\\n\
-  --disable-extensions \\\n\
-  --disable-plugins \\\n\
-  --disable-default-apps \\\n\
-  --disable-sync \\\n\
   --no-first-run \\\n\
-  --no-default-browser-check \\\n\
-  --disable-web-security \\\n\
-  --disable-background-networking \\\n\
-  --disable-client-side-phishing-detection \\\n\
-  --disable-component-extensions-with-background-pages \\\n\
-  --disable-hang-monitor \\\n\
-  --disable-prompt-on-repost \\\n\
-  --disable-web-resources \\\n\
-  --disable-crash-reporter \\\n\
-  --disable-logging \\\n\
-  --silent \\\n\
   --user-data-dir=/tmp/chrome-user-data \\\n\
   "$@"' > /usr/local/bin/chrome-wrapper \
   && chmod +x /usr/local/bin/chrome-wrapper
@@ -103,7 +79,7 @@ echo "Starting Google Chrome..."\n\
 exec chrome-wrapper http://localhost:8080\n' > /usr/bin/start-stirling \
  && chmod +x /usr/bin/start-stirling
 
-# Create Kasm default profile
+# Create Kasm default profile and ensure it auto-starts
 RUN mkdir -p /usr/share/kasm_default_profile && \
     cat << 'EOF' > /usr/share/kasm_default_profile/profile.json
 {
@@ -112,6 +88,18 @@ RUN mkdir -p /usr/share/kasm_default_profile && \
   "command": "/usr/bin/start-stirling",
   "icon": "fa fa-file-pdf-o"
 }
+EOF
+
+# Create the autostart directory and script
+RUN mkdir -p /etc/xdg/autostart && \
+    cat << 'EOF' > /etc/xdg/autostart/stirling-pdf.desktop
+[Desktop Entry]
+Type=Application
+Name=Stirling PDF
+Exec=/usr/bin/start-stirling
+Hidden=false
+NoDisplay=false
+X-GNOME-Autostart-enabled=true
 EOF
 
 # Switch to kasm-user for runtime
