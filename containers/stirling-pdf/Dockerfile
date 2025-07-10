@@ -1,17 +1,13 @@
 FROM kasmweb/core-ubuntu-focal:1.16.1-rolling-daily
-
 USER root
 
-# Install Java, Chromium, and unzip
+# Install Java, Chromium, and dependencies
 RUN apt-get update && apt-get install -y \
     openjdk-17-jre \
     wget \
     gnupg \
-    software-properties-common && \
-    add-apt-repository ppa:canonical-chromium-builds/stage && \
-    apt-get update && apt-get install -y chromium-browser && \
-    rm -rf /var/lib/apt/lists/*
-
+    chromium-browser \
+    && rm -rf /var/lib/apt/lists/*
 
 # Download and install Stirling PDF via .deb (with dependencies)
 RUN wget -O /tmp/stirling.deb https://github.com/Stirling-Tools/Stirling-PDF/releases/latest/download/stirling.deb \
@@ -24,7 +20,7 @@ RUN wget -O /tmp/stirling.deb https://github.com/Stirling-Tools/Stirling-PDF/rel
 RUN echo '#!/bin/bash\n\
 /opt/stirling-pdf/StirlingPDF &\n\
 sleep 5\n\
-chromium --no-sandbox http://localhost:8080\n' > /usr/bin/start-stirling \
+chromium --no-sandbox --disable-dev-shm-usage --disable-extensions --disable-plugins --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-renderer-backgrounding http://localhost:8080\n' > /usr/bin/start-stirling \
  && chmod +x /usr/bin/start-stirling
 
 # Create Kasm default profile
