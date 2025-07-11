@@ -11,7 +11,17 @@ WORKDIR $HOME
 ######### Customize Container Here ###########
 # Copy Netbird installation scripts
 COPY ./workspaces/netbird/install/ $INST_SCRIPTS/netbird/
+RUN echo "=== After COPY ===" && ls -la $INST_SCRIPTS/netbird/
 #RUN bash $INST_SCRIPTS/netbird/install_netbird.sh && rm -rf $INST_SCRIPTS/netbird/
+
+RUN echo "=== Debug: Environment check ===" && \
+    echo "INST_SCRIPTS = $INST_SCRIPTS" && \
+    echo "Current directory:" && \
+    pwd && \
+    echo "=== Debug: Listing directories ===" && \
+    ls -la $INST_SCRIPTS/ && \
+    echo "=== Debug: Checking if netbird directory exists ===" && \
+    ls -la $INST_SCRIPTS/netbird/ || echo "netbird directory not found"
 
 # Debug version:
 RUN echo "=== Debug: Checking script exists ===" && \
