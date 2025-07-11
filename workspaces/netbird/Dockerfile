@@ -51,7 +51,7 @@ RUN echo '#!/bin/bash' > $STARTUPDIR/custom_startup.sh && \
     echo '/usr/bin/desktop_ready' >> $STARTUPDIR/custom_startup.sh && \
     echo '$STARTUPDIR/netbird_setup.sh &' >> $STARTUPDIR/custom_startup.sh && \
     chmod +x $STARTUPDIR/custom_startup.sh
-######### End Customizations ###########
+######### End Customizations ##########
 
 RUN chown 1000:0 $HOME
 RUN $STARTUPDIR/set_user_permission.sh $HOME
