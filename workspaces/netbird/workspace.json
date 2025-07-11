@@ -14,7 +14,7 @@
       "version": "1.17.x",
       "image": "ghcr.io/jongodb/kasm-jondevs/netbird:latest",
       "uncompressed_size_mb": 2800,
-      "available_tags": ["latest"]
+      "available_tags": ["develop"]
     }
   ],
   "notes": "Configure Netbird server URL and authentication in workspace settings. Supports both device authentication flow and setup keys.",
