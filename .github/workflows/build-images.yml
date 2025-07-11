@@ -22,7 +22,6 @@ jobs:
       - name: Detect changed workspaces
         id: changes
         run: |
-          # Detect which workspace Dockerfiles changed
           changed_workspaces=$(git diff --name-only HEAD^ HEAD | grep '^workspaces/.*/Dockerfile$' | cut -d'/' -f2 | sort -u | jq -R -s -c 'split("\n")[:-1]')
           echo "workspaces=$changed_workspaces" >> $GITHUB_OUTPUT
 
@@ -55,7 +54,7 @@ jobs:
           file: workspaces/${{ matrix.workspace }}/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}/${{ matrix.workspace }}:latest
-            ghcr.io/${{ github.repository }}/${{ matrix.workspace }}:${{ github.sha }}
+            ghcr.io/jongodb/kasm-jondevs/${{ matrix.workspace }}:latest
+            ghcr.io/jongodb/kasm-jondevs/${{ matrix.workspace }}:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
