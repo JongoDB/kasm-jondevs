@@ -1,22 +1,19 @@
 {
-  "friendly_name": "Stirling PDF",
-  "description": "All-in-one PDF tool for editing, merging, splitting, and converting PDFs.",
+  "description": "Stirling PDF - All-in-one PDF toolkit with merge, split, convert, OCR, and more. Runs in browser with full desktop environment.",
+  "docker_registry": "https://ghcr.io/v2/",
   "image_src": "stirling-pdf.png",
-  "categories": [
-    "Productivity"
-  ],
-  "architecture": [
-    "amd64"
-  ],
-  "docker_registry": "https://ghcr.io",
+  "name": "ghcr.io/jongodb/kasm-jondevs/stirling-pdf:latest",
+  "categories": ["Office", "Productivity"],
+  "friendly_name": "Stirling PDF",
+  "architecture": ["amd64"],
   "compatibility": [
     {
       "version": "1.17.x",
-      "image": "ghcr.io/jongodb/kasm-stirling-pdf:latest",
-      "uncompressed_size_mb": 1000,
-      "available_tags": [
-        "latest"
-      ]
+      "image": "ghcr.io/jongodb/kasm-jondevs/stirling-pdf:latest",
+      "uncompressed_size_mb": 3200,
+      "available_tags": ["latest", "develop"]
     }
-  ]
+  ],
+  "notes": "Stirling PDF automatically starts on container launch and opens in Chrome. Access via desktop shortcut or navigate to http://localhost:8080",
+  "cpu_allocation_method": "Inherit"
 }
