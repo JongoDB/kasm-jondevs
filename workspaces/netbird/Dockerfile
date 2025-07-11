@@ -9,14 +9,15 @@ ENV INST_SCRIPTS=$STARTUPDIR/install
 WORKDIR $HOME
 
 ######### Customize Container Here ###########
-# Copy Netbird installation scripts
+# Copy all install files at once
 COPY ./install/ $INST_SCRIPTS/netbird/
 
-# Copy the setup script to its permanent location BEFORE deleting and setup for auto-connection
-COPY ./install/netbird_setup.sh $STARTUPDIR/netbird_setup.sh
-RUN chmod +x $STARTUPDIR/netbird_setup.sh
+# Set permissions and move setup script
+RUN chmod +x $INST_SCRIPTS/netbird/*.sh && \
+    cp $INST_SCRIPTS/netbird/netbird_setup.sh $STARTUPDIR/netbird_setup.sh && \
+    chmod +x $STARTUPDIR/netbird_setup.sh
 
-# Run the installation and clean up
+# Run installation and cleanup
 RUN bash $INST_SCRIPTS/netbird/install_netbird.sh && rm -rf $INST_SCRIPTS/netbird/
 
 # Create desktop shortcut for Netbird management
