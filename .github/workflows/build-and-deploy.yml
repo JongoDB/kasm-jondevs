@@ -1,25 +1,26 @@
-name: Build
-
+name: Build Registry Website
 on:
   push:
     branches-ignore:
       - 'gh-pages'
+    paths:
+      - 'workspaces/*/workspace.json'
+      - 'site/**'
+      - 'processing/**'
+      - 'build_all_branches.sh'
 permissions:
   contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Build # Have to run processing first so the list.json exists to be included in the the deploy
+      - uses: actions/checkout@v4  # Updated to v4
+      - name: Build Registry Website
         run: |
           npm ci --prefix processing 
           npm ci --prefix site
           ./build_all_branches.sh
-
-      - name: Deploy
+      - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
