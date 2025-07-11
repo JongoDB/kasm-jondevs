@@ -10,27 +10,8 @@ WORKDIR $HOME
 
 ######### Customize Container Here ###########
 # Copy Netbird installation scripts
-COPY ./workspaces/netbird/install/ $INST_SCRIPTS/netbird/
-RUN echo "=== After COPY ===" && ls -la $INST_SCRIPTS/netbird/
-#RUN bash $INST_SCRIPTS/netbird/install_netbird.sh && rm -rf $INST_SCRIPTS/netbird/
-
-RUN echo "=== Debug: Environment check ===" && \
-    echo "INST_SCRIPTS = $INST_SCRIPTS" && \
-    echo "Current directory:" && \
-    pwd && \
-    echo "=== Debug: Listing directories ===" && \
-    ls -la $INST_SCRIPTS/ && \
-    echo "=== Debug: Checking if netbird directory exists ===" && \
-    ls -la $INST_SCRIPTS/netbird/ || echo "netbird directory not found"
-
-# Debug version:
-RUN echo "=== Debug: Checking script exists ===" && \
-    ls -la $INST_SCRIPTS/netbird/ && \
-    echo "=== Debug: Script content ===" && \
-    head -20 $INST_SCRIPTS/netbird/install_netbird.sh && \
-    echo "=== Debug: Running script ===" && \
-    bash -x $INST_SCRIPTS/netbird/install_netbird.sh && \
-    rm -rf $INST_SCRIPTS/netbird/
+COPY ./install/ $INST_SCRIPTS/netbird/
+RUN bash $INST_SCRIPTS/netbird/install_netbird.sh && rm -rf $INST_SCRIPTS/netbird/
 
 # Create desktop shortcut for Netbird management
 RUN echo "[Desktop Entry]" > $HOME/Desktop/netbird.desktop && \
@@ -59,7 +40,7 @@ RUN echo "[Desktop Entry]" > $HOME/Desktop/netbird-terminal.desktop && \
     chown 1000:1000 $HOME/Desktop/netbird-terminal.desktop
 
 # Setup custom startup script for auto-connection
-COPY ./workspaces/netbird/install/netbird_setup.sh $STARTUPDIR/netbird_setup.sh
+COPY ./install/netbird_setup.sh $STARTUPDIR/netbird_setup.sh
 RUN chmod +x $STARTUPDIR/netbird_setup.sh
 
 # Create custom startup script that runs after desktop is ready
