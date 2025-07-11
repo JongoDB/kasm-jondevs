@@ -11,7 +11,16 @@ WORKDIR $HOME
 ######### Customize Container Here ###########
 # Copy Netbird installation scripts
 COPY ./workspaces/netbird/install/ $INST_SCRIPTS/netbird/
-RUN bash $INST_SCRIPTS/netbird/install_netbird.sh && rm -rf $INST_SCRIPTS/netbird/
+#RUN bash $INST_SCRIPTS/netbird/install_netbird.sh && rm -rf $INST_SCRIPTS/netbird/
+
+# Debug version:
+RUN echo "=== Debug: Checking script exists ===" && \
+    ls -la $INST_SCRIPTS/netbird/ && \
+    echo "=== Debug: Script content ===" && \
+    head -20 $INST_SCRIPTS/netbird/install_netbird.sh && \
+    echo "=== Debug: Running script ===" && \
+    bash -x $INST_SCRIPTS/netbird/install_netbird.sh && \
+    rm -rf $INST_SCRIPTS/netbird/
 
 # Create desktop shortcut for Netbird management
 RUN echo "[Desktop Entry]" > $HOME/Desktop/netbird.desktop && \
