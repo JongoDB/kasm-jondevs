@@ -1,0 +1,35 @@
+{
+  "description": "Ubuntu desktop with Netbird VPN client pre-installed for secure mesh networking. Administrators can configure server URL and authentication method through workspace settings.",
+  "docker_registry": "https://ghcr.io/v2/",
+  "image_src": "netbird.png",
+  "name": "ghcr.io/jongodb/kasm-jondevs/netbird:latest",
+  "categories": ["Security", "Networking"],
+  "friendly_name": "Netbird VPN Client",
+  "architecture": ["amd64"],
+  "compatibility": [
+    {
+      "version": "1.17.x",
+      "image": "ghcr.io/jongodb/kasm-jondevs/netbird:latest",
+      "uncompressed_size_mb": 2800,
+      "available_tags": ["latest", "develop"]
+    }
+  ],
+  "notes": "Configure Netbird server URL and authentication in workspace settings. Supports both device authentication flow and setup keys.",
+  "cpu_allocation_method": "Inherit",
+  "docker_run_config": {
+    "environment": {
+      "NETBIRD_SERVER_URL": "https://api.netbird.io",
+      "NETBIRD_SETUP_KEY": "",
+      "NETBIRD_AUTH_METHOD": "device_auth",
+      "NETBIRD_AUTO_CONNECT": "false"
+    },
+    "cap_add": ["NET_ADMIN"],
+    "sysctls": {
+      "net.ipv4.ip_forward": "1",
+      "net.ipv6.conf.all.forwarding": "1"
+    },
+    "devices": [
+      "/dev/net/tun:/dev/net/tun"
+    ]
+  }
+}
