@@ -11,7 +11,7 @@
       "version": "1.17.x",
       "image": "ghcr.io/jongodb/kasm-jondevs/stirling-pdf:latest",
       "uncompressed_size_mb": 3200,
-      "available_tags": ["latest", "develop"]
+      "available_tags": ["develop"]
     }
   ],
   "notes": "Stirling PDF automatically starts on container launch and opens in Chrome. Access via desktop shortcut or navigate to http://localhost:8080",
