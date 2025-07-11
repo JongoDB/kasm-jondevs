@@ -10,7 +10,7 @@ WORKDIR $HOME
 
 ######### Customize Container Here ###########
 # Copy all install files at once
-COPY ./install/ $INST_SCRIPTS/netbird/
+COPY ./workspaces/netbird/install/ $INST_SCRIPTS/netbird/
 
 # Set permissions and move setup script
 RUN chmod +x $INST_SCRIPTS/netbird/*.sh && \
